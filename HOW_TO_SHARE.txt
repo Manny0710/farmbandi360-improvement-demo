@@ -1,0 +1,28 @@
+FarmBandi360 In-Depth Demo — how to present
+============================================
+
+Open: index.html
+
+Flow for the owner meeting
+--------------------------
+1) SELECT OPTIONS
+   - Tick the upgrades you want to pitch
+   - Or use presets: Quick wins / Trust / Full UX / Everything
+   - Selected chips appear on the right
+
+2) PLAY DEMO
+   - Click “Play demo with selected options”
+   - Narrator walks step-by-step; phone UI updates to match
+   - Use Next / Back, Auto-play, or tap the phone freely
+   - Only selected features appear (others stay hidden or show “current site”)
+
+3) SUMMARY
+   - Leave-behind list of what you proposed
+
+Share options
+-------------
+- Screen-share while clicking through
+- Zip this folder and send on WhatsApp
+- Upload index.html to https://app.netlify.com/drop for a public link
+
+Note: Concept demo only — not connected to live farmbandi360.com

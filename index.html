@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FarmBandi360 — In-Depth Improvement Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy: #0c2d4a;
+    --blue: #155a8a;
+    --sky: #e8f3fa;
+    --orange: #e85d04;
+    --green: #2a9d6a;
+    --ink: #1a1f2e;
+    --muted: #5c6578;
+    --line: #d8e0ea;
+    --white: #fff;
+    --shadow: 0 12px 40px rgba(12, 45, 74, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "DM Sans", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse 80% 50% at 10% -10%, #d6ebf7 0%, transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, #ffe8d6 0%, transparent 50%),
+      linear-gradient(180deg, #f4f7fa 0%, #eef2f6 100%);
+    min-height: 100vh;
+  }
+  button, input, select, textarea { font-family: inherit; }
+  button { cursor: pointer; border: none; background: none; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 60;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; padding: 12px 22px;
+    background: rgba(255,255,255,.9); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--navy); }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--navy), var(--blue));
+    display: grid; place-items: center; color: #fff; font-size: 15px;
+  }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 13px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted);
+  }
+  .tab:hover { background: var(--sky); color: var(--navy); }
+  .tab.active { background: var(--navy); color: #fff; }
+  .pill {
+    font-size: 11px; font-weight: 700; color: var(--orange);
+    background: #fff3e8; padding: 6px 11px; border-radius: 999px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 18px 90px; }
+  .view { display: none; animation: fade .3s ease; }
+  .view.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 10px;
+  }
+  .eyebrow::before { content: ""; width: 16px; height: 2px; background: var(--orange); }
+  h1 {
+    font-family: Fraunces, Georgia, serif;
+    font-size: clamp(28px, 4.5vw, 42px); line-height: 1.12; color: var(--navy); margin-bottom: 12px;
+  }
+  .lede { font-size: 16px; line-height: 1.55; color: var(--muted); max-width: 560px; margin-bottom: 20px; }
+  .section-title { font-family: Fraunces, serif; font-size: 26px; color: var(--navy); margin: 8px 0 6px; }
+  .section-sub { color: var(--muted); margin-bottom: 18px; max-width: 640px; line-height: 1.5; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 16px; border-radius: 12px; font-weight: 700; font-size: 14px;
+    transition: .15s transform;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--navy); color: #fff; box-shadow: 0 8px 20px rgba(12,45,74,.22); }
+  .btn-orange { background: var(--orange); color: #fff; }
+  .btn-ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  /* BUILDER */
+  .builder {
+    display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 22px; align-items: start;
+  }
+  @media (max-width: 960px) { .builder { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #fff; border: 1px solid var(--line); border-radius: 20px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .panel-head {
+    padding: 16px 18px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .panel-head h2 { font-size: 16px; color: var(--navy); }
+  .panel-head p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .panel-body { padding: 14px 16px 18px; }
+
+  .pack {
+    border: 1.5px solid var(--line); border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+  }
+  .pack-head {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+    background: #f8fafc; cursor: pointer; user-select: none;
+  }
+  .pack-head strong { font-size: 14px; color: var(--navy); }
+  .pack-head span { font-size: 12px; color: var(--muted); }
+  .pack-count {
+    margin-left: auto; font-size: 11px; font-weight: 800;
+    background: var(--sky); color: var(--blue); padding: 4px 8px; border-radius: 999px;
+  }
+  .feat {
+    display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: start;
+    padding: 12px 14px; border-top: 1px solid var(--line);
+  }
+  .feat:hover { background: #fafcfe; }
+  .feat input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--navy); }
+  .feat h4 { font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+  .feat p { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .tag {
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
+    padding: 4px 7px; border-radius: 6px; white-space: nowrap;
+  }
+  .tag.crit { background: #fde8e8; color: #b42318; }
+  .tag.high { background: #fff3e8; color: #b54708; }
+  .tag.med { background: #eef4ff; color: #3538cd; }
+
+  .selected-box {
+    background: #f4f8fb; border: 1px dashed #b7c9d9; border-radius: 14px;
+    padding: 14px; min-height: 120px; margin-bottom: 14px;
+  }
+  .selected-box.empty { color: var(--muted); font-size: 13px; text-align: center; padding: 28px 12px; }
+  .sel-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 10px; font-size: 12px; font-weight: 600; margin: 0 6px 6px 0;
+  }
+  .sel-chip button { color: #b42318; font-weight: 800; font-size: 14px; line-height: 1; }
+  .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .preset {
+    font-size: 12px; font-weight: 700; padding: 7px 11px; border-radius: 999px;
+    border: 1px solid var(--line); background: #fff; color: var(--navy);
+  }
+  .preset:hover { border-color: var(--blue); background: var(--sky); }
+
+  /* PLAY STAGE */
+  .play-layout {
+    display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start;
+  }
+  @media (max-width: 960px) { .play-layout { grid-template-columns: 1fr; } }
+
+  .phone-frame {
+    background: #0a2238; border-radius: 34px; padding: 12px;
+    box-shadow: 0 24px 60px rgba(12,45,74,.35);
+    position: sticky; top: 78px;
+  }
+  .phone-notch {
+    width: 100px; height: 18px; background: #0a2238; border-radius: 0 0 12px 12px;
+    margin: -2px auto 6px;
+  }
+  .app {
+    background: #f3f6f9; border-radius: 26px; overflow: hidden; height: 620px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .app-screen { display: none; flex: 1; overflow-y: auto; }
+  .app-screen.on { display: flex; flex-direction: column; }
+  .app-bar {
+    background: linear-gradient(135deg, var(--navy), #1a5278);
+    color: #fff; padding: 14px 14px 12px; flex-shrink: 0;
+  }
+  .app-bar h2 { font-size: 15px; }
+  .app-bar p { font-size: 10px; opacity: .8; margin-top: 2px; }
+  .app-content { padding: 12px; flex: 1; }
+  .back-link {
+    font-size: 11px; font-weight: 700; color: #9ec5e0; margin-bottom: 4px;
+    display: inline-flex; cursor: pointer;
+  }
+
+  .narrator {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow); padding: 18px; min-height: 280px;
+  }
+  .narrator .step-num {
+    font-size: 11px; font-weight: 800; color: var(--orange); text-transform: uppercase;
+    letter-spacing: .05em; margin-bottom: 8px;
+  }
+  .narrator h3 { font-family: Fraunces, serif; font-size: 22px; color: var(--navy); margin-bottom: 8px; }
+  .narrator p { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 14px; }
+  .feat-callout {
+    background: var(--sky); border-left: 3px solid var(--blue); border-radius: 0 10px 10px 0;
+    padding: 10px 12px; font-size: 13px; color: var(--navy); margin-bottom: 14px; line-height: 1.45;
+  }
+  .feat-callout strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--blue); margin-bottom: 4px; }
+  .progress {
+    height: 6px; background: #e6eef5; border-radius: 99px; overflow: hidden; margin-bottom: 14px;
+  }
+  .progress > i { display: block; height: 100%; background: linear-gradient(90deg, var(--orange), var(--navy)); width: 0%; transition: width .35s; }
+  .step-list { list-style: none; display: grid; gap: 6px; margin-top: 14px; max-height: 220px; overflow: auto; }
+  .step-list li {
+    font-size: 12px; padding: 8px 10px; border-radius: 10px; color: var(--muted);
+    border: 1px solid transparent;
+  }
+  .step-list li.done { background: #e8f7ef; color: #067647; }
+  .step-list li.current { background: var(--sky); color: var(--navy); border-color: #b7d4e8; font-weight: 700; }
+  .step-list li.locked { opacity: .45; }
+
+  /* APP UI bits */
+  .search {
+    background: #fff; border: 1px solid #cfd8e3; border-radius: 12px;
+    padding: 10px 12px; font-size: 12px; color: var(--muted);
+    display: flex; gap: 8px; margin-bottom: 10px;
+  }
+  .promo {
+    background: linear-gradient(120deg, #ff7a18, #e85d04 55%, #c2410c);
+    color: #fff; border-radius: 14px; padding: 12px; margin-bottom: 12px;
+  }
+  .promo strong { display: block; font-size: 14px; }
+  .promo span { font-size: 11px; opacity: .9; }
+  .chip-row { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; }
+  .chip {
+    flex: 0 0 auto; background: #fff; border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 11px; font-size: 11px; font-weight: 700; color: var(--navy);
+  }
+  .chip.on { background: var(--navy); color: #fff; }
+  .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .svc {
+    background: #fff; border: 1.5px solid #d0dceb; border-radius: 12px;
+    padding: 12px 8px; text-align: center; font-size: 11px; font-weight: 700; color: var(--navy);
+    cursor: pointer;
+  }
+  .svc span { display: block; font-size: 20px; margin-bottom: 3px; }
+  .svc:hover { border-color: var(--blue); }
+  .input {
+    width: 100%; border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 11px 12px; font-size: 13px; margin-bottom: 8px; background: #fff;
+  }
+  .primary-full {
+    width: 100%; background: var(--navy); color: #fff; border-radius: 12px;
+    padding: 12px; font-weight: 800; font-size: 13px;
+  }
+  .otp-row { display: flex; gap: 6px; margin: 10px 0 14px; }
+  .otp-box {
+    flex: 1; aspect-ratio: 1; border: 2px solid var(--blue); border-radius: 10px;
+    display: grid; place-items: center; font-weight: 800; background: #fff; color: var(--navy);
+  }
+  .seller {
+    background: #fff; border-radius: 12px; padding: 10px; margin-bottom: 8px;
+    border: 1px solid var(--line); display: flex; gap: 10px; align-items: center; cursor: pointer;
+  }
+  .seller:hover { border-color: var(--blue); }
+  .seller-logo {
+    width: 44px; height: 44px; border-radius: 11px;
+    background: linear-gradient(135deg, #ffe8d6, #ffd6a8);
+    display: grid; place-items: center; font-size: 20px; flex-shrink: 0;
+  }
+  .seller h4 { font-size: 12px; color: var(--navy); }
+  .seller p { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .badge {
+    font-size: 9px; font-weight: 800; background: #e8f7ef; color: var(--green);
+    padding: 3px 6px; border-radius: 999px; margin-left: auto;
+  }
+  .badge.closed { background: #fde8e8; color: #b42318; }
+  .item {
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center;
+  }
+  .item-img {
+    width: 48px; height: 48px; border-radius: 10px; background: var(--sky);
+    display: grid; place-items: center; font-size: 22px; flex-shrink: 0;
+  }
+  .item h4 { font-size: 12px; color: var(--navy); }
+  .item p { font-size: 10px; color: var(--muted); margin: 2px 0 4px; }
+  .item .price { font-weight: 800; color: var(--navy); font-size: 12px; }
+  .add-btn {
+    margin-left: auto; background: var(--navy); color: #fff;
+    width: 30px; height: 30px; border-radius: 9px; font-weight: 800; font-size: 16px;
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .cart-bar {
+    position: absolute; left: 10px; right: 10px; bottom: 10px;
+    background: var(--navy); color: #fff; border-radius: 12px;
+    padding: 11px 12px; display: none; align-items: center; justify-content: space-between;
+    font-size: 12px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,.25); cursor: pointer;
+  }
+  .cart-bar.show { display: flex; }
+  .mode-cards { display: grid; gap: 8px; }
+  .mode-card {
+    background: #fff; border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 12px; display: flex; gap: 10px; align-items: center; cursor: pointer;
+  }
+  .mode-card:hover, .mode-card.on { border-color: var(--blue); background: #f3f8fc; }
+  .mode-card .ico { font-size: 22px; }
+  .mode-card h4 { font-size: 13px; color: var(--navy); }
+  .mode-card p { font-size: 11px; color: var(--muted); }
+  .pay-opt {
+    background: #fff; border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 12px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; cursor: pointer;
+  }
+  .pay-opt.on { border-color: var(--green); background: #f3faf6; }
+  .pay-opt h4 { font-size: 13px; }
+  .pay-opt p { font-size: 11px; color: var(--muted); }
+  .trust { font-size: 11px; color: var(--muted); margin: 8px 0 12px; display: flex; gap: 6px; align-items: center; }
+  .lang-toggle {
+    display: inline-flex; background: rgba(255,255,255,.15); border-radius: 8px; padding: 2px; gap: 2px;
+  }
+  .lang-toggle button {
+    font-size: 10px; font-weight: 700; color: #cfe6f5; padding: 4px 8px; border-radius: 6px;
+  }
+  .lang-toggle button.on { background: #fff; color: var(--navy); }
+  .menu-photo {
+    background: #e8eef3; border-radius: 12px; height: 140px;
+    display: grid; place-items: center; color: var(--muted); font-size: 12px; font-weight: 600;
+    text-align: center; padding: 12px; margin-bottom: 10px;
+  }
+  .dropdown-fake {
+    background: #fff; border: 1px solid #cfd8e3; border-radius: 10px;
+    padding: 10px; font-size: 12px; color: var(--muted); margin-bottom: 10px;
+  }
+  .highlight-pulse {
+    outline: 2px solid var(--orange); outline-offset: 2px;
+    animation: pulse 1s ease 2;
+  }
+  @keyframes pulse {
+    0%,100% { outline-color: var(--orange); }
+    50% { outline-color: transparent; }
+  }
+
+  .empty-play {
+    text-align: center; padding: 40px 20px; color: var(--muted);
+  }
+  .empty-play h3 { font-family: Fraunces, serif; color: var(--navy); margin-bottom: 8px; }
+
+  .compare-mini {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+  }
+  .compare-mini div {
+    border-radius: 12px; padding: 10px; font-size: 11px; line-height: 1.4;
+  }
+  .cmp-before { background: #fde8e8; color: #912018; }
+  .cmp-after { background: #e8f7ef; color: #067647; }
+
+  .footer-note {
+    margin-top: 22px; text-align: center; font-size: 12px; color: var(--muted);
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">🚜</div>
+      <div>FarmBandi360 · Demo Builder</div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-view="build">1. Select options</button>
+      <button class="tab" data-view="play">2. Play demo</button>
+      <button class="tab" data-view="summary">3. Summary</button>
+    </nav>
+    <div class="pill">Pick features → Play them live</div>
+  </header>
+
+  <main class="wrap">
+    <!-- BUILD -->
+    <section id="build" class="view active">
+      <div class="eyebrow">For presenting to FarmBandi owner</div>
+      <h1>Build your improvement demo</h1>
+      <p class="lede">
+        Tick the upgrades you want to pitch. Then hit <strong>Play demo</strong> —
+        the phone walkthrough only shows what you selected.
+      </p>
+
+      <div class="builder">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Improvement options</h2>
+              <p>Select what you can deliver for farmbandi360.com</p>
+            </div>
+            <div class="cta-row">
+              <button class="btn btn-ghost" type="button" onclick="selectAll(true)">Select all</button>
+              <button class="btn btn-ghost" type="button" onclick="selectAll(false)">Clear</button>
+            </div>
+          </div>
+          <div class="panel-body" id="packs"></div>
+        </div>
+
+        <div>
+          <div class="panel" style="margin-bottom:14px">
+            <div class="panel-head">
+              <div>
+                <h2>Quick presets</h2>
+                <p>One-click bundles for the meeting</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="preset-row">
+                <button class="preset" type="button" onclick="applyPreset('quick')">Quick wins (bugs + copy)</button>
+                <button class="preset" type="button" onclick="applyPreset('trust')">Trust & login</button>
+                <button class="preset" type="button" onclick="applyPreset('ux')">Full UX pitch</button>
+                <button class="preset" type="button" onclick="applyPreset('all')">Everything</button>
+              </div>
+              <div class="selected-box" id="selectedBox">
+                <div class="empty">No options selected yet — tick features on the left.</div>
+              </div>
+              <div class="cta-row">
+                <button class="btn btn-orange" type="button" id="playBtn" onclick="startPlay()" disabled>
+                  ▶ Play demo with selected options
+                </button>
+                <button class="btn btn-ghost" type="button" onclick="go('summary')">Preview summary</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>How Play mode works</h2>
+                <p>Owner-friendly guided walkthrough</p>
+              </div>
+            </div>
+            <div class="panel-body" style="font-size:13px;color:var(--muted);line-height:1.55">
+              <ol style="padding-left:18px;display:grid;gap:8px">
+                <li>Each selected feature becomes a <strong>step</strong> in the phone demo.</li>
+                <li>Narrator explains the problem → your fix, while the UI updates live.</li>
+                <li>Owner can also tap the phone freely between auto steps.</li>
+                <li>Unselected features stay hidden (or show as “current site” contrast).</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLAY -->
+    <section id="play" class="view">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+        <div>
+          <div class="eyebrow">Play demo mode</div>
+          <h2 class="section-title" style="margin-top:0">Live walkthrough</h2>
+          <p class="section-sub" style="margin-bottom:0">Driven by your selected options. Use Next / Back or tap the phone.</p>
+        </div>
+        <div class="cta-row">
+          <button class="btn btn-ghost" type="button" onclick="go('build')">← Edit options</button>
+          <button class="btn btn-primary" type="button" id="autoBtn" onclick="toggleAuto()">Auto-play</button>
+        </div>
+      </div>
+
+      <div id="playEmpty" class="panel" style="display:none">
+        <div class="empty-play">
+          <h3>Nothing selected</h3>
+          <p style="margin-bottom:16px">Go back and tick at least one improvement option.</p>
+          <button class="btn btn-orange" type="button" onclick="go('build')">Select options</button>
+        </div>
+      </div>
+
+      <div id="playStage" class="play-layout">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="app" id="app">
+            <!-- screens injected / controlled by JS -->
+            <div class="app-screen on" id="sc-splash">
+              <div class="app-bar">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div><h2 data-i18n="brand">FarmBandi</h2><p data-i18n="tagline">Raichur · Freshness Delivered 360°</p></div>
+                  <div class="lang-toggle feat-ui" data-feat="bilingual" style="display:none">
+                    <button type="button" class="on" data-lang="en" onclick="setLang('en')">EN</button>
+                    <button type="button" data-lang="kn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+                  </div>
+                </div>
+              </div>
+              <div class="app-content" style="display:flex;flex-direction:column;justify-content:center;min-height:480px">
+                <div style="text-align:center;padding:20px">
+                  <div style="font-size:42px;margin-bottom:10px">🚜</div>
+                  <h3 style="font-family:Fraunces,serif;color:var(--navy);margin-bottom:8px" data-i18n="readyTitle">Ready for your demo</h3>
+                  <p style="font-size:13px;color:var(--muted);margin-bottom:16px" data-i18n="readySub">Press Next to walk through selected upgrades.</p>
+                  <button class="primary-full" type="button" onclick="nextStep()">Start →</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-login-old">
+              <div class="app-bar"><div><h2>FarmBandi</h2><p>Quality at your doorstep</p></div></div>
+              <div class="app-content">
+                <div style="font-size:11px;color:#b42318;font-weight:700;margin-bottom:8px">CURRENT SITE (problem)</div>
+                <input class="input" value="Mahantesh Patil" readonly />
+                <input class="input" value="8105249726" readonly />
+                <button class="primary-full" type="button" style="background:#2b6cb0" onclick="flashBug()">LOGIN & EXPLORE →</button>
+                <div id="bugNote" style="display:none;margin-top:10px;background:#fde8e8;color:#912018;border-radius:10px;padding:10px;font-size:11px;font-weight:600">
+                  Session saved — but welcome screen stays visible (display CSS bug).
+                </div>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-login-new">
+              <div class="app-bar">
+                <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                  <div><h2 data-i18n="brand">FarmBandi</h2><p data-i18n="secureLogin">Secure customer login</p></div>
+                  <div class="lang-toggle feat-ui" data-feat="bilingual" style="display:none">
+                    <button type="button" class="on" data-lang="en" onclick="setLang('en')">EN</button>
+                    <button type="button" data-lang="kn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+                  </div>
+                </div>
+              </div>
+              <div class="app-content">
+                <h3 style="font-family:Fraunces,serif;font-size:22px;color:var(--navy);margin:6px 0 6px" data-i18n="welcomeBack">Welcome back</h3>
+                <p style="font-size:12px;color:var(--muted);margin-bottom:12px" data-i18n="otpHint">Verify with OTP — no open impersonation.</p>
+                <input class="input" id="nm" value="Mahantesh Patil" />
+                <input class="input" id="mb" value="8105249726" />
+                <div class="trust feat-ui" data-feat="otpLogin">🔒 OTP on WhatsApp / SMS</div>
+                <div class="trust feat-ui" data-feat="fixLoginBug" style="display:none">✓ Reliable navigation after login</div>
+                <button class="primary-full" type="button" onclick="goLoginNext()">Send OTP / Continue</button>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-otp">
+              <div class="app-bar"><div><h2 data-i18n="verifyOtp">Verify OTP</h2><p>+91 81052 49726</p></div></div>
+              <div class="app-content">
+                <p style="font-size:12px;color:var(--muted)">Demo code <strong>1234</strong></p>
+                <div class="otp-row">
+                  <div class="otp-box">1</div><div class="otp-box">2</div>
+                  <div class="otp-box">3</div><div class="otp-box">4</div>
+                </div>
+                <button class="primary-full" type="button" onclick="showScreen('home')">Verify & enter app</button>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-home">
+              <div class="app-bar">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%">
+                  <div>
+                    <h2 data-i18n="hello">Namaskara, Mahantesh</h2>
+                    <p data-i18n="hours">Delivering Raichur · 1pm–9pm</p>
+                  </div>
+                  <div class="lang-toggle feat-ui" data-feat="bilingual" style="display:none">
+                    <button type="button" class="on" data-lang="en" onclick="setLang('en')">EN</button>
+                    <button type="button" data-lang="kn" onclick="setLang('kn')">ಕನ್ನಡ</button>
+                  </div>
+                </div>
+              </div>
+              <div class="app-content">
+                <div class="search feat-ui" data-feat="search" id="searchBox" style="display:none">🔍 <span data-i18n="searchPh">Search biryani, kirana, medicine…</span></div>
+                <div class="promo">
+                  <strong data-i18n="promoTitle">FarmBandi Special</strong>
+                  <span data-i18n="promoSub">Official partner for Raichur’s local kitchens</span>
+                </div>
+                <div class="chip-row feat-ui" data-feat="openBadges" style="display:none">
+                  <div class="chip on" data-i18n="chipAll">All</div>
+                  <div class="chip" data-i18n="chipOpen">Open now</div>
+                  <div class="chip feat-ui" data-feat="reorder" style="display:none" data-i18n="chipReorder">Reorder</div>
+                </div>
+                <div class="svc-grid">
+                  <div class="svc" onclick="openService('food')"><span>🍛</span><span data-i18n="svcFood">Order Food</span></div>
+                  <div class="svc" onclick="openService('kirana')"><span>🛒</span><span data-i18n="svcKirana">Local Kirana</span></div>
+                  <div class="svc"><span>🍎</span><span data-i18n="svcFruits">Fruits</span></div>
+                  <div class="svc"><span>🥦</span><span data-i18n="svcVeg">Vegetables</span></div>
+                  <div class="svc"><span>💊</span><span data-i18n="svcMed">Medical</span></div>
+                  <div class="svc"><span>🍱</span><span data-i18n="svcDabba">Dabbawala</span></div>
+                </div>
+                <div class="feat-ui" data-feat="speedPack" style="display:none;margin-top:10px;background:#e8f7ef;color:#067647;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:700">
+                  ⚡ Menus load from CDN — not 2.4MB base64 dump
+                </div>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-sellers-old">
+              <div class="app-bar">
+                <div class="back-link" onclick="showScreen('home')">← Home</div>
+                <h2>ORDER FOOD</h2>
+                <p>Current site pattern</p>
+              </div>
+              <div class="app-content">
+                <div style="font-size:11px;font-weight:700;margin-bottom:8px">Select Food Category</div>
+                <div class="chip-row">
+                  <div class="chip">Veg</div><div class="chip on">Non Veg</div>
+                  <div class="chip">Chats</div><div class="chip">Cakes</div>
+                </div>
+                <div class="dropdown-fake">-- CLICK TO SELECT SELLER -- ▾</div>
+                <p style="font-size:11px;color:var(--muted)">Long dropdown · hard to scan · no ETA / open status</p>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-sellers">
+              <div class="app-bar">
+                <div class="back-link" onclick="showScreen('home')">← <span data-i18n="home">Home</span></div>
+                <h2 data-i18n="orderFood">Order Food · Non Veg</h2>
+                <p data-i18n="choosePartner">Choose a partner restaurant</p>
+              </div>
+              <div class="app-content" id="sellerList"></div>
+            </div>
+
+            <div class="app-screen" id="sc-menu-photo">
+              <div class="app-bar">
+                <div class="back-link" onclick="showScreen('sellers')">← Sellers</div>
+                <h2>Tattva Fine Dine</h2>
+                <p>Photo menu only (current)</p>
+              </div>
+              <div class="app-content">
+                <div class="menu-photo">📄 Menu JPEG<br/>Zoom to read · No prices · No cart</div>
+                <div class="mode-cards">
+                  <div class="mode-card"><div class="ico">⌨️</div><div><h4>Type order</h4><p>Manually enter list</p></div></div>
+                  <div class="mode-card"><div class="ico">🎙️</div><div><h4>Speak order</h4><p>Record voice</p></div></div>
+                  <div class="mode-card"><div class="ico">📷</div><div><h4>Upload photo</h4><p>Handwritten list</p></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-menu">
+              <div class="app-bar">
+                <div class="back-link" onclick="showScreen('sellers')">← Sellers</div>
+                <h2 id="menuTitle">Tattva Fine Dine</h2>
+                <p data-i18n="menuHint">Tap + to add · Speak/Photo still available</p>
+              </div>
+              <div class="app-content" style="padding-bottom:70px" id="menuItems"></div>
+              <div class="cart-bar feat-ui" data-feat="cartCheckout" id="cartBar" onclick="showScreen('checkout')">
+                <span id="cartLabel">1 item · ₹0</span>
+                <span data-i18n="checkout">Checkout →</span>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-kirana">
+              <div class="app-bar">
+                <div class="back-link" onclick="showScreen('home')">← Home</div>
+                <h2 data-i18n="svcKirana">Local Kirana</h2>
+                <p data-i18n="orderModes">Choose how to place order</p>
+              </div>
+              <div class="app-content">
+                <div class="mode-cards">
+                  <div class="mode-card on" onclick="pickMode(this,'type')"><div class="ico">⌨️</div><div><h4 data-i18n="typeOrder">Type order</h4><p>1kg rice, 1ltr oil…</p></div></div>
+                  <div class="mode-card" onclick="pickMode(this,'speak')"><div class="ico">🎙️</div><div><h4 data-i18n="speakOrder">Speak order</h4><p>Record in Kannada / English</p></div></div>
+                  <div class="mode-card" onclick="pickMode(this,'photo')"><div class="ico">📷</div><div><h4 data-i18n="photoOrder">Upload photo</h4><p>Handwritten list</p></div></div>
+                </div>
+                <textarea class="input" id="kiranaText" rows="3" style="margin-top:12px;resize:vertical" placeholder="1kg rice&#10;1ltr oil&#10;2 Lux gold"></textarea>
+                <button class="primary-full" type="button" onclick="showScreen('checkout')">Continue to delivery</button>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-checkout">
+              <div class="app-bar">
+                <div class="back-link" onclick="history.back && showScreen('menu')">← Back</div>
+                <h2 data-i18n="checkoutTitle">Checkout</h2>
+                <p id="checkoutSub">Review & pay</p>
+              </div>
+              <div class="app-content">
+                <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;font-size:12px">
+                  <div style="font-weight:700;margin-bottom:4px" id="checkoutItems">Order summary</div>
+                  <div style="color:var(--muted)" id="checkoutAddr">Delivery: Raichur · GPS / address</div>
+                  <div style="margin-top:8px;font-weight:800" id="checkoutTotal">Total: ₹0 + delivery</div>
+                </div>
+                <div id="payOptions"></div>
+                <button class="primary-full" type="button" onclick="showScreen('done')" data-i18n="placeOrder">Place order</button>
+              </div>
+            </div>
+
+            <div class="app-screen" id="sc-done">
+              <div class="app-bar"><div><h2 data-i18n="orderPlaced">Order placed</h2><p>FB-DEMO-204</p></div></div>
+              <div class="app-content" style="text-align:center;padding-top:40px">
+                <div style="font-size:48px;margin-bottom:10px">🎉</div>
+                <h3 style="font-family:Fraunces,serif;color:var(--navy);margin-bottom:8px" data-i18n="onWay">Sent to store & rider team</h3>
+                <p style="font-size:12px;color:var(--muted);margin-bottom:14px" id="doneNote">WhatsApp updates on 8105249726</p>
+                <div class="feat-ui" data-feat="orderTracking" style="display:none;background:var(--sky);border-radius:12px;padding:12px;margin-bottom:14px;text-align:left;font-size:12px">
+                  <strong>Live status</strong><br/>Confirmed → Preparing → Out for delivery → Delivered
+                </div>
+                <button class="primary-full" type="button" onclick="restartPlay()">Replay from start</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="narrator">
+          <div class="progress"><i id="progBar"></i></div>
+          <div class="step-num" id="stepNum">Step 0</div>
+          <h3 id="stepTitle">Your demo</h3>
+          <p id="stepBody">Select options and press Play.</p>
+          <div class="feat-callout" id="stepCallout" style="display:none">
+            <strong>Active feature</strong>
+            <span id="stepFeat"></span>
+          </div>
+          <div class="compare-mini" id="stepCompare" style="display:none">
+            <div class="cmp-before" id="cmpBefore"></div>
+            <div class="cmp-after" id="cmpAfter"></div>
+          </div>
+          <div class="cta-row" style="margin-top:16px">
+            <button class="btn btn-ghost" type="button" onclick="prevStep()">← Back</button>
+            <button class="btn btn-primary" type="button" id="nextBtn" onclick="nextStep()">Next →</button>
+          </div>
+          <ul class="step-list" id="stepList"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUMMARY -->
+    <section id="summary" class="view">
+      <div class="eyebrow">Leave-behind for the owner</div>
+      <h2 class="section-title">Pitch summary</h2>
+      <p class="section-sub">Generated from the options you selected in step 1.</p>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Selected improvement scope</h2>
+            <p id="summaryCount">0 features</p>
+          </div>
+          <button class="btn btn-orange" type="button" onclick="startPlay()">▶ Play this scope</button>
+        </div>
+        <div class="panel-body" id="summaryList"></div>
+      </div>
+      <p class="footer-note">Concept demo · Inspired by live audit of farmbandi360.com V2.3 · Not the production site</p>
+    </section>
+  </main>
+
+<script>
+/* ========== FEATURE CATALOG ========== */
+const FEATURES = [
+  {
+    pack: "Bug-fix pack",
+    packId: "bugs",
+    items: [
+      {
+        id: "fixLoginBug",
+        title: "Fix login navigation bug",
+        desc: "Welcome screen stuck after login because of inline display vs .section.active.",
+        tag: "crit",
+        tagLabel: "Critical",
+        screen: "login-old",
+        afterScreen: "home",
+        narrate: {
+          title: "Login that actually opens the app",
+          body: "On the live site, login can save the session but leave the customer on the welcome form. We fix section routing so Home always appears.",
+          before: "Session set · UI stuck on login",
+          after: "One tap → Home services grid"
+        }
+      },
+      {
+        id: "copyPolish",
+        title: "Fix copy typos & ticker",
+        desc: "Whatapp → WhatsApp, quatity → quantity, clearer service hours.",
+        tag: "med",
+        tagLabel: "Polish",
+        screen: "home",
+        narrate: {
+          title: "Professional, clear language",
+          body: "Small copy errors on a public site reduce trust. We clean ticker text and bilingual labels.",
+          before: "“Whatapp” / “quatity”",
+          after: "Clean WhatsApp + hours messaging"
+        }
+      }
+    ]
+  },
+  {
+    pack: "Trust pack",
+    packId: "trust",
+    items: [
+      {
+        id: "otpLogin",
+        title: "OTP login (SMS / WhatsApp)",
+        desc: "Stop open name+mobile impersonation.",
+        tag: "crit",
+        tagLabel: "Critical",
+        screen: "login-new",
+        narrate: {
+          title: "Verify the customer",
+          body: "Today anyone can type any number. OTP proves the phone belongs to the customer before ordering.",
+          before: "Name + mobile only",
+          after: "OTP gate → secure session"
+        }
+      },
+      {
+        id: "realPayments",
+        title: "Honest payments (real UPI or COD)",
+        desc: "Remove auto-success UPI simulation; use gateway or Pay on delivery.",
+        tag: "crit",
+        tagLabel: "Critical",
+        screen: "checkout",
+        narrate: {
+          title: "Payments customers can trust",
+          body: "The live site’s UPI modal can auto-mark success. We show real UPI or clear Cash / Pay on delivery.",
+          before: "Simulated PhonePe success",
+          after: "Real UPI link or COD labelled clearly"
+        }
+      }
+    ]
+  },
+  {
+    pack: "Speed pack",
+    packId: "speed",
+    items: [
+      {
+        id: "speedPack",
+        title: "Shrink sellers API & kill base64 menus",
+        desc: "~2.4MB sellers payload and base64 images in localStorage → CDN URLs + compression.",
+        tag: "high",
+        tagLabel: "High",
+        screen: "home",
+        narrate: {
+          title: "Fast on Raichur 4G",
+          body: "Menus stored as huge base64 blobs make first load heavy. We serve compressed image URLs and lighter APIs.",
+          before: "~2.4MB sellers dump",
+          after: "Lazy images · lean JSON"
+        }
+      }
+    ]
+  },
+  {
+    pack: "UX + catalog pack",
+    packId: "ux",
+    items: [
+      {
+        id: "search",
+        title: "Home search",
+        desc: "Find kirana, food, medical in one box.",
+        tag: "high",
+        tagLabel: "UX",
+        screen: "home",
+        narrate: {
+          title: "Find anything faster",
+          body: "Add a search bar on Home so returning customers jump straight to a shop or dish.",
+          before: "Tap through service grids only",
+          after: "Search → results in one step"
+        }
+      },
+      {
+        id: "sellerCards",
+        title: "Seller cards (not dropdown)",
+        desc: "Logo, area, ETA, open/closed instead of long select list.",
+        tag: "high",
+        tagLabel: "UX",
+        screen: "sellers",
+        narrate: {
+          title: "Browse sellers like a modern app",
+          body: "Replace “CLICK TO SELECT SELLER” dropdown with scannable cards — area, ETA, open badge.",
+          before: "Long dropdown",
+          after: "Visual seller cards"
+        }
+      },
+      {
+        id: "openBadges",
+        title: "Open / closed badges",
+        desc: "Show which partners are accepting orders now.",
+        tag: "med",
+        tagLabel: "UX",
+        screen: "sellers",
+        narrate: {
+          title: "Only show what’s open",
+          body: "Respect 1pm–9pm operations with per-seller open state so customers don’t order from closed kitchens.",
+          before: "No availability signal",
+          after: "Open / Closed badges"
+        }
+      },
+      {
+        id: "structuredMenu",
+        title: "Structured menu + prices",
+        desc: "Tap items with prices instead of photo-only menus.",
+        tag: "high",
+        tagLabel: "UX",
+        screen: "menu",
+        narrate: {
+          title: "Order from a real menu",
+          body: "Keep Type/Speak/Photo, but add priced items so most orders are one-tap adds.",
+          before: "JPEG menu only",
+          after: "Items · prices · add button"
+        }
+      },
+      {
+        id: "cartCheckout",
+        title: "Cart & checkout bar",
+        desc: "Running total and one-tap checkout.",
+        tag: "high",
+        tagLabel: "UX",
+        screen: "menu",
+        narrate: {
+          title: "Cart that converts",
+          body: "A sticky cart bar shows item count and total — familiar pattern that lifts completion.",
+          before: "Free-text list only",
+          after: "Sticky cart → checkout"
+        }
+      },
+      {
+        id: "keepVoicePhoto",
+        title: "Keep Type / Speak / Photo",
+        desc: "Preserve FarmBandi’s unique order modes for kirana & custom lists.",
+        tag: "med",
+        tagLabel: "Keep",
+        screen: "kirana",
+        narrate: {
+          title: "Your unique advantage stays",
+          body: "We don’t remove Speak/Photo — we keep them for kirana and custom orders alongside the new catalog.",
+          before: "Only free-form modes",
+          after: "Catalog + Speak/Photo power features"
+        }
+      },
+      {
+        id: "bilingual",
+        title: "Kannada + English UI",
+        desc: "Toggle language for broader Raichur reach.",
+        tag: "med",
+        tagLabel: "Local",
+        screen: "home",
+        narrate: {
+          title: "Speak the customer’s language",
+          body: "EN / ಕನ್ನಡ toggle on key screens builds inclusion for local users.",
+          before: "English-only UI chrome",
+          after: "One-tap bilingual labels"
+        }
+      },
+      {
+        id: "reorder",
+        title: "Reorder last order",
+        desc: "One tap to repeat a previous order.",
+        tag: "med",
+        tagLabel: "Growth",
+        screen: "home",
+        narrate: {
+          title: "Bring customers back",
+          body: "Reorder chip on Home for weekly kirana / tiffin habits.",
+          before: "Start from scratch every time",
+          after: "Reorder in one tap"
+        }
+      },
+      {
+        id: "orderTracking",
+        title: "Order status tracking",
+        desc: "Confirmed → preparing → out for delivery.",
+        tag: "med",
+        tagLabel: "Growth",
+        screen: "done",
+        narrate: {
+          title: "Peace of mind after ordering",
+          body: "Show live status and WhatsApp updates so customers don’t call support for every order.",
+          before: "Success screen only",
+          after: "Status timeline + WhatsApp"
+        }
+      }
+    ]
+  }
+];
+
+const I18N = {
+  en: {
+    brand: "FarmBandi", tagline: "Raichur · Freshness Delivered 360°",
+    readyTitle: "Ready for your demo", readySub: "Press Next to walk through selected upgrades.",
+    secureLogin: "Secure customer login", welcomeBack: "Welcome back",
+    otpHint: "Verify with OTP — no open impersonation.",
+    verifyOtp: "Verify OTP", hello: "Namaskara, Mahantesh",
+    hours: "Delivering Raichur · 1pm–9pm",
+    searchPh: "Search biryani, kirana, medicine…",
+    promoTitle: "FarmBandi Special", promoSub: "Official partner for Raichur’s local kitchens",
+    chipAll: "All", chipOpen: "Open now", chipReorder: "Reorder",
+    svcFood: "Order Food", svcKirana: "Local Kirana", svcFruits: "Fruits",
+    svcVeg: "Vegetables", svcMed: "Medical", svcDabba: "Dabbawala",
+    home: "Home", orderFood: "Order Food · Non Veg", choosePartner: "Choose a partner restaurant",
+    menuHint: "Tap + to add · Speak/Photo still available", checkout: "Checkout →",
+    orderModes: "Choose how to place order", typeOrder: "Type order", speakOrder: "Speak order",
+    photoOrder: "Upload photo", checkoutTitle: "Checkout", placeOrder: "Place order",
+    orderPlaced: "Order placed", onWay: "Sent to store & rider team"
+  },
+  kn: {
+    brand: "ಫಾರ್ಮ್‌ಬಂಡಿ", tagline: "ರಾಯಚೂರು · ತಾಜಾ ವಿತರಣೆ 360°",
+    readyTitle: "ಡೆಮೊ ಸಿದ್ಧ", readySub: "ಆಯ್ಕೆ ಮಾಡಿದ ಸುಧಾರಣೆಗಳನ್ನು ನೋಡಲು Next ಒತ್ತಿ.",
+    secureLogin: "ಸುರಕ್ಷಿತ ಲಾಗಿನ್", welcomeBack: "ಸ್ವಾಗತ",
+    otpHint: "OTP ಮೂಲಕ ದೃಢೀಕರಿಸಿ.",
+    verifyOtp: "OTP ಪರಿಶೀಲಿಸಿ", hello: "ನಮಸ್ಕಾರ, ಮಹಂತೇಶ್",
+    hours: "ರಾಯಚೂರು · ಮಧ್ಯಾಹ್ನ 1 – ರಾತ್ರಿ 9",
+    searchPh: "ಬಿರಿಯಾನಿ, ಕಿರಾಣಿ, ಮೆಡಿಸಿನ್ ಹುಡುಕಿ…",
+    promoTitle: "ಫಾರ್ಮ್‌ಬಂಡಿ ಸ್ಪೆಷಲ್", promoSub: "ಸ್ಥಳೀಯ ಅಡುಗೆಮನೆಗಳ ಅಧಿಕೃತ ಪಾಲುದಾರ",
+    chipAll: "ಎಲ್ಲಾ", chipOpen: "ಈಗ ತೆರೆದಿದೆ", chipReorder: "ಮರು ಆರ್ಡರ್",
+    svcFood: "ಆಹಾರ ಆರ್ಡರ್", svcKirana: "ಸ್ಥಳೀಯ ಕಿರಾಣಿ", svcFruits: "ಹಣ್ಣುಗಳು",
+    svcVeg: "ತರಕಾರಿ", svcMed: "ಮೆಡಿಕಲ್", svcDabba: "ಡಬ್ಬಾವಾಲಾ",
+    home: "ಮುಖಪುಟ", orderFood: "ಆಹಾರ · ನಾನ್ ವೆಜ್", choosePartner: "ರೆಸ್ಟೋರೆಂಟ್ ಆಯ್ಕೆ",
+    menuHint: "+ ಒತ್ತಿ ಸೇರಿಸಿ", checkout: "ಚೆಕ್‌ಔಟ್ →",
+    orderModes: "ಆರ್ಡರ್ ವಿಧಾನ", typeOrder: "ಟೈಪ್", speakOrder: "ಮಾತನಾಡಿ",
+    photoOrder: "ಫೋಟೋ", checkoutTitle: "ಚೆಕ್‌ಔಟ್", placeOrder: "ಆರ್ಡರ್ ಮಾಡಿ",
+    orderPlaced: "ಆರ್ಡರ್ ಆಯಿತು", onWay: "ಅಂಗಡಿ ಮತ್ತು ರೈಡರ್‌ಗೆ ಕಳುಹಿಸಲಾಗಿದೆ"
+  }
+};
+
+const SELLERS = [
+  { name: "Tattva Fine Dine", area: "Mantralayam Road", eta: "25–35 min", emoji: "🍽️", open: true },
+  { name: "Raichur Biryani House", area: "Gunj Circle", eta: "30–40 min", emoji: "🥘", open: true },
+  { name: "Hallimane", area: "Opp. District Court", eta: "20–30 min", emoji: "🏠", open: true },
+  { name: "Abhiruchi", area: "Gunj Road", eta: "25–35 min", emoji: "🔥", open: false }
+];
+
+const MENU = [
+  { name: "Angara Chicken Tikka", meta: "Smoky · 6 pcs", price: 280, emoji: "🍗" },
+  { name: "Mutton Sheekh Kebab", meta: "4 pcs · Chef special", price: 320, emoji: "🍖" },
+  { name: "Chicken Biryani", meta: "Full · Serves 2", price: 240, emoji: "🍚" },
+  { name: "Royyala Vepudu", meta: "Andhra style prawns", price: 360, emoji: "🦐" }
+];
+
+let selected = new Set();
+let playSteps = [];
+let stepIndex = 0;
+let cartCount = 0;
+let cartTotal = 0;
+let autoTimer = null;
+let lang = "en";
+
+/* ========== BUILD UI ========== */
+function renderPacks() {
+  const root = document.getElementById("packs");
+  root.innerHTML = FEATURES.map(pack => {
+    const ids = pack.items.map(i => i.id);
+    const count = ids.filter(id => selected.has(id)).length;
+    return `
+      <div class="pack">
+        <div class="pack-head" onclick="togglePackCheck('${pack.packId}')">
+          <input type="checkbox" ${count === pack.items.length ? "checked" : ""} onclick="event.stopPropagation(); togglePack('${pack.packId}', this.checked)" />
+          <div>
+            <strong>${pack.pack}</strong>
+            <div><span>${pack.items.length} options</span></div>
+          </div>
+          <div class="pack-count">${count}/${pack.items.length}</div>
+        </div>
+        ${pack.items.map(item => `
+          <label class="feat">
+            <input type="checkbox" data-id="${item.id}" ${selected.has(item.id) ? "checked" : ""} onchange="toggleFeat('${item.id}', this.checked)" />
+            <div>
+              <h4>${item.title}</h4>
+              <p>${item.desc}</p>
+            </div>
+            <div class="tag ${item.tag}">${item.tagLabel}</div>
+          </label>
+        `).join("")}
+      </div>`;
+  }).join("");
+  renderSelected();
+}
+
+function allItems() {
+  return FEATURES.flatMap(p => p.items);
+}
+
+function toggleFeat(id, on) {
+  if (on) selected.add(id); else selected.delete(id);
+  renderPacks();
+}
+
+function togglePack(packId, on) {
+  const pack = FEATURES.find(p => p.packId === packId);
+  pack.items.forEach(i => on ? selected.add(i.id) : selected.delete(i.id));
+  renderPacks();
+}
+
+function togglePackCheck(packId) {
+  const pack = FEATURES.find(p => p.packId === packId);
+  const allOn = pack.items.every(i => selected.has(i.id));
+  togglePack(packId, !allOn);
+}
+
+function selectAll(on) {
+  allItems().forEach(i => on ? selected.add(i.id) : selected.delete(i.id));
+  renderPacks();
+}
+
+function applyPreset(name) {
+  selected.clear();
+  const map = {
+    quick: ["fixLoginBug", "copyPolish"],
+    trust: ["fixLoginBug", "otpLogin", "realPayments"],
+    ux: ["fixLoginBug", "otpLogin", "search", "sellerCards", "openBadges", "structuredMenu", "cartCheckout", "keepVoicePhoto", "bilingual"],
+    all: allItems().map(i => i.id)
+  };
+  (map[name] || []).forEach(id => selected.add(id));
+  renderPacks();
+}
+
+function renderSelected() {
+  const box = document.getElementById("selectedBox");
+  const btn = document.getElementById("playBtn");
+  btn.disabled = selected.size === 0;
+  if (selected.size === 0) {
+    box.innerHTML = `<div class="empty">No options selected yet — tick features on the left.</div>`;
+  } else {
+    box.innerHTML = [...selected].map(id => {
+      const f = allItems().find(x => x.id === id);
+      return `<span class="sel-chip">${f.title} <button type="button" onclick="toggleFeat('${id}', false)" title="Remove">×</button></span>`;
+    }).join("");
+  }
+  renderSummary();
+}
+
+function renderSummary() {
+  const list = document.getElementById("summaryList");
+  const count = document.getElementById("summaryCount");
+  count.textContent = selected.size + " feature" + (selected.size === 1 ? "" : "s") + " selected";
+  if (selected.size === 0) {
+    list.innerHTML = `<p style="color:var(--muted);font-size:14px">Nothing selected. Go to <strong>Select options</strong> first.</p>`;
+    return;
+  }
+  list.innerHTML = FEATURES.map(pack => {
+    const items = pack.items.filter(i => selected.has(i.id));
+    if (!items.length) return "";
+    return `<div style="margin-bottom:16px">
+      <h3 style="font-size:14px;color:var(--navy);margin-bottom:8px">${pack.pack}</h3>
+      ${items.map(i => `<div style="padding:10px 0;border-bottom:1px solid var(--line)">
+        <strong style="font-size:13px">${i.title}</strong>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${i.desc}</div>
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+}
+
+/* ========== NAV ========== */
+function go(id) {
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.view === id));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (id === "play") preparePlay();
+  if (id === "summary") renderSummary();
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => go(t.dataset.view)));
+
+/* ========== PLAY ENGINE ========== */
+function buildSteps() {
+  const steps = [
+    {
+      id: "intro",
+      title: "Demo starts",
+      body: "We’ll walk through only the upgrades you ticked. Tap Next — or explore the phone yourself.",
+      screen: "splash",
+      featIds: []
+    }
+  ];
+
+  // Contrast: show old login if fixing login or otp
+  if (selected.has("fixLoginBug") || selected.has("otpLogin")) {
+    steps.push({
+      id: "problem-login",
+      title: "Problem on live site",
+      body: "Customer enters name + mobile and taps Login — but may stay stuck on the welcome screen.",
+      screen: "login-old",
+      featIds: ["fixLoginBug"],
+      compare: true,
+      before: "Broken / unclear login",
+      after: "Fixed flow next"
+    });
+  }
+
+  allItems().forEach(item => {
+    if (!selected.has(item.id)) return;
+    // skip duplicate problem step content
+    steps.push({
+      id: item.id,
+      title: item.narrate.title,
+      body: item.narrate.body,
+      screen: item.screen,
+      afterScreen: item.afterScreen,
+      featIds: [item.id],
+      compare: true,
+      before: item.narrate.before,
+      after: item.narrate.after,
+      featureTitle: item.title
+    });
+  });
+
+  steps.push({
+    id: "finale",
+    title: "Ready to propose",
+    body: "These selected upgrades are what you’d deliver. Jump to Summary for a leave-behind list, or replay.",
+    screen: "done",
+    featIds: [...selected]
+  });
+
+  return steps;
+}
+
+function startPlay() {
+  if (selected.size === 0) return;
+  go("play");
+}
+
+function preparePlay() {
+  const empty = document.getElementById("playEmpty");
+  const stage = document.getElementById("playStage");
+  if (selected.size === 0) {
+    empty.style.display = "block";
+    stage.style.display = "none";
+    return;
+  }
+  empty.style.display = "none";
+  stage.style.display = "grid";
+  playSteps = buildSteps();
+  stepIndex = 0;
+  cartCount = 0; cartTotal = 0;
+  document.getElementById("cartBar").classList.remove("show");
+  applyFeatureVisibility();
+  renderSellerList();
+  renderMenu();
+  renderPayOptions();
+  renderStepList();
+  applyStep(0);
+  setLang(lang);
+}
+
+function applyFeatureVisibility() {
+  document.querySelectorAll(".feat-ui").forEach(el => {
+    const need = el.getAttribute("data-feat");
+    el.style.display = selected.has(need) ? "" : "none";
+  });
+  // bilingual toggles
+  document.querySelectorAll('.feat-ui[data-feat="bilingual"]').forEach(el => {
+    el.style.display = selected.has("bilingual") ? "inline-flex" : "none";
+  });
+}
+
+function renderSellerList() {
+  const useCards = selected.has("sellerCards") || selected.has("openBadges");
+  const root = document.getElementById("sellerList");
+  if (!useCards) {
+    root.innerHTML = `<div class="dropdown-fake">-- CLICK TO SELECT SELLER -- ▾</div>
+      <p style="font-size:11px;color:var(--muted)">Enable “Seller cards” to preview the upgrade.</p>
+      <button class="primary-full" type="button" onclick="openMenuSeller(SELLERS[0])">Open first seller (demo)</button>`;
+    return;
+  }
+  root.innerHTML = SELLERS.map(s => `
+    <div class="seller" onclick='openMenuSeller(${JSON.stringify(s)})'>
+      <div class="seller-logo">${s.emoji}</div>
+      <div>
+        <h4>${s.name}</h4>
+        <p>${s.area} · ${s.eta}</p>
+      </div>
+      ${selected.has("openBadges") ? `<div class="badge ${s.open ? "" : "closed"}">${s.open ? "Open" : "Closed"}</div>` : ""}
+    </div>`).join("");
+}
+
+function renderMenu() {
+  const root = document.getElementById("menuItems");
+  if (!selected.has("structuredMenu")) {
+    root.innerHTML = `<div class="menu-photo">Enable “Structured menu + prices” to see item cards.</div>
+      <div class="mode-cards">
+        <div class="mode-card"><div class="ico">⌨️</div><div><h4>Type</h4><p>Fallback mode</p></div></div>
+        <div class="mode-card"><div class="ico">🎙️</div><div><h4>Speak</h4><p>Fallback mode</p></div></div>
+      </div>`;
+    return;
+  }
+  root.innerHTML = MENU.map(m => `
+    <div class="item">
+      <div class="item-img">${m.emoji}</div>
+      <div style="flex:1">
+        <h4>${m.name}</h4>
+        <p>${m.meta}</p>
+        <div class="price">₹${m.price}</div>
+      </div>
+      <button class="add-btn" type="button" onclick="addCart(${m.price})">+</button>
+    </div>`).join("") +
+    (selected.has("keepVoicePhoto")
+      ? `<p style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px">Type · Speak · Photo still available as power features</p>`
+      : "");
+}
+
+function renderPayOptions() {
+  const root = document.getElementById("payOptions");
+  if (selected.has("realPayments")) {
+    root.innerHTML = `
+      <div class="pay-opt on" onclick="selectPay(this)">
+        <div style="font-size:22px">💸</div>
+        <div><h4>UPI (PhonePe / GPay / BHIM)</h4><p>Real payment link — not a simulation</p></div>
+      </div>
+      <div class="pay-opt" onclick="selectPay(this)">
+        <div style="font-size:22px">🛵</div>
+        <div><h4>Pay on delivery</h4><p>Cash / UPI to rider — clearly labelled</p></div>
+      </div>`;
+  } else {
+    root.innerHTML = `
+      <div class="pay-opt on">
+        <div style="font-size:22px">⚠️</div>
+        <div><h4>Current risk: simulated UPI</h4><p>Enable “Honest payments” to show the fix</p></div>
+      </div>`;
+  }
+}
+
+function selectPay(el) {
+  document.querySelectorAll(".pay-opt").forEach(x => x.classList.remove("on"));
+  el.classList.add("on");
+}
+
+function renderStepList() {
+  const ul = document.getElementById("stepList");
+  ul.innerHTML = playSteps.map((s, i) =>
+    `<li class="${i < stepIndex ? "done" : i === stepIndex ? "current" : "locked"}" onclick="jumpStep(${i})">${i + 1}. ${s.title}</li>`
+  ).join("");
+}
+
+function applyStep(i) {
+  stepIndex = Math.max(0, Math.min(i, playSteps.length - 1));
+  const step = playSteps[stepIndex];
+  document.getElementById("stepNum").textContent = `Step ${stepIndex + 1} of ${playSteps.length}`;
+  document.getElementById("stepTitle").textContent = step.title;
+  document.getElementById("stepBody").textContent = step.body;
+  document.getElementById("progBar").style.width = ((stepIndex) / Math.max(playSteps.length - 1, 1) * 100) + "%";
+
+  const callout = document.getElementById("stepCallout");
+  if (step.featureTitle) {
+    callout.style.display = "block";
+    document.getElementById("stepFeat").textContent = step.featureTitle;
+  } else {
+    callout.style.display = "none";
+  }
+
+  const cmp = document.getElementById("stepCompare");
+  if (step.compare) {
+    cmp.style.display = "grid";
+    document.getElementById("cmpBefore").textContent = "Before: " + step.before;
+    document.getElementById("cmpAfter").textContent = "After: " + step.after;
+  } else {
+    cmp.style.display = "none";
+  }
+
+  document.getElementById("nextBtn").textContent = stepIndex >= playSteps.length - 1 ? "Finish → Summary" : "Next →";
+  showScreen(step.screen);
+  // highlight feat UI
+  document.querySelectorAll(".highlight-pulse").forEach(el => el.classList.remove("highlight-pulse"));
+  (step.featIds || []).forEach(fid => {
+    document.querySelectorAll(`[data-feat="${fid}"]`).forEach(el => {
+      if (el.style.display !== "none") el.classList.add("highlight-pulse");
+    });
+  });
+  renderStepList();
+  updateCheckoutSummary();
+}
+
+function nextStep() {
+  if (stepIndex >= playSteps.length - 1) {
+    stopAuto();
+    go("summary");
+    return;
+  }
+  applyStep(stepIndex + 1);
+}
+
+function prevStep() {
+  applyStep(stepIndex - 1);
+}
+
+function jumpStep(i) {
+  applyStep(i);
+}
+
+function showScreen(name) {
+  // map logical names
+  const map = {
+    splash: "sc-splash",
+    "login-old": "sc-login-old",
+    "login-new": "sc-login-new",
+    otp: "sc-otp",
+    home: "sc-home",
+    sellers: selected.has("sellerCards") || selected.has("openBadges") ? "sc-sellers" : "sc-sellers-old",
+    "sellers-old": "sc-sellers-old",
+    menu: selected.has("structuredMenu") ? "sc-menu" : "sc-menu-photo",
+    "menu-photo": "sc-menu-photo",
+    kirana: "sc-kirana",
+    checkout: "sc-checkout",
+    done: "sc-done"
+  };
+  const id = map[name] || ("sc-" + name);
+  document.querySelectorAll(".app-screen").forEach(s => s.classList.remove("on"));
+  const el = document.getElementById(id);
+  if (el) el.classList.add("on");
+  applyFeatureVisibility();
+  if (name === "checkout") updateCheckoutSummary();
+}
+
+function goLoginNext() {
+  if (selected.has("otpLogin")) showScreen("otp");
+  else showScreen("home");
+}
+
+function flashBug() {
+  const n = document.getElementById("bugNote");
+  n.style.display = "block";
+  n.classList.add("highlight-pulse");
+}
+
+function openService(type) {
+  if (type === "food") showScreen("sellers");
+  if (type === "kirana") showScreen("kirana");
+}
+
+function openMenuSeller(s) {
+  document.getElementById("menuTitle").textContent = s.name;
+  showScreen("menu");
+}
+
+function addCart(price) {
+  if (!selected.has("cartCheckout") && !selected.has("structuredMenu")) return;
+  cartCount += 1;
+  cartTotal += price;
+  const bar = document.getElementById("cartBar");
+  if (selected.has("cartCheckout")) {
+    bar.classList.add("show");
+    document.getElementById("cartLabel").textContent =
+      cartCount + (cartCount === 1 ? " item" : " items") + " · ₹" + cartTotal;
+  }
+  updateCheckoutSummary();
+}
+
+function updateCheckoutSummary() {
+  document.getElementById("checkoutItems").textContent =
+    cartCount ? `${cartCount} food item(s)` : (document.getElementById("kiranaText")?.value ? "Kirana list order" : "Demo order");
+  document.getElementById("checkoutTotal").textContent =
+    "Total: ₹" + (cartTotal || 0) + " + delivery";
+  document.getElementById("doneNote").textContent =
+    selected.has("orderTracking")
+      ? "WhatsApp status updates on 8105249726"
+      : "Confirmation sent · enable tracking feature for live status UI";
+}
+
+function pickMode(el) {
+  document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("on"));
+  el.classList.add("on");
+}
+
+function restartPlay() {
+  cartCount = 0; cartTotal = 0;
+  document.getElementById("cartBar").classList.remove("show");
+  applyStep(0);
+}
+
+function toggleAuto() {
+  if (autoTimer) { stopAuto(); return; }
+  document.getElementById("autoBtn").textContent = "Stop auto-play";
+  document.getElementById("autoBtn").classList.add("btn-orange");
+  autoTimer = setInterval(() => {
+    if (stepIndex >= playSteps.length - 1) { stopAuto(); return; }
+    nextStep();
+  }, 4200);
+}
+
+function stopAuto() {
+  if (autoTimer) clearInterval(autoTimer);
+  autoTimer = null;
+  const b = document.getElementById("autoBtn");
+  if (b) { b.textContent = "Auto-play"; b.classList.remove("btn-orange"); }
+}
+
+function setLang(code) {
+  lang = code;
+  const dict = I18N[code] || I18N.en;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (dict[key]) el.textContent = dict[key];
+  });
+  document.querySelectorAll(".lang-toggle button").forEach(b => {
+    b.classList.toggle("on", b.getAttribute("data-lang") === code);
+  });
+}
+
+/* init */
+renderPacks();
+applyPreset("ux");
+</script>
+</body>
+</html>
